@@ -27,6 +27,8 @@ $newline = "^";
 $endline = "(\n|$)";
 $headerKey = "[\\w\\-_\[\]@]+";
 $space = "\\s*";
+$spaceOne = "\\s?";
+$matchValue = ".*";
 
 $comment = [
     "match" => "#{$newline}//([^\n]*)\\n#U",
@@ -82,7 +84,7 @@ $syntax = [
         $blank,
         $comment,
         [
-            "match" => "#{$newline}({$headerKey}){$space}:{$space}(.*){$endline}#",
+            "match" => "#{$newline}({$headerKey}){$space}:{$spaceOne}({$matchValue}){$endline}#",
             "action" => "setKv",
         ],
         [

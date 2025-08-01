@@ -1,5 +1,24 @@
 <?php
 
+/**
+ * 解析JSON - 支持过滤注释行
+ */
+function resolve_json($jsonString)
+{
+    $newString = '';
+    $lines = explode("\n", $jsonString);
+    foreach ($lines as $line) {
+        if (preg_match('/^ *\/\//', $line)) {
+            // 注释行
+            continue;
+        } else {
+            $newString .= $line."\n";
+        }
+    }
+
+    return json_decode($newString, true);
+}
+
 class InputEndException extends Exception {
 
 }
@@ -232,18 +251,22 @@ class Requester {
         'headers' => [],
     ];
 
-    public function __construct($inputFileName, $projectPath)
+    public function __construct($inputFileName, $projectPath, $selection)
     {
-        $this->buffer = file_get_contents($inputFileName);
+        $this->buffer = @file_get_contents($inputFileName);
         $this->inputFileName = $inputFileName;
         $this->out = $inputFileName . '.out.txt';
 
+        if ($selection) {
+            $this->buffer = $selection;
+        }
 
         $this->config = $this->defaultConfig;
 
         $configFile = $projectPath . '/requester.json';
         if (file_exists($configFile)) {
-            $config = json_decode(file_get_contents($configFile), true);
+            $configJson = file_get_contents($configFile);
+            $config = resolve_json($configJson);
             if (is_array($config)) {
                 $this->config = array_merge($this->config, $config);
             } else {
@@ -421,8 +444,9 @@ class Requester {
 
 $input = $argv[1];
 $projectPath = $argv[2];
+$selection = $argv[3] ?? '';
 
-$instance = new Requester($input, $projectPath);
+$instance = new Requester($input, $projectPath, $selection);
 try {
     $instance->run();
 } catch (Exception $e) {

@@ -1,4 +1,6 @@
 {
-	"cmd": ["php", "$packages/HttpUnit/requester.php", "$file", "$project_path"],
+    "cmd_sel": ["php", "$packages/HttpUnit/requester.php", "$file", "$project_path", "${SELECTION:}"],
+    "target": "exec_selection",
+    "cancel": {"kill": true},
 	"selector" : "source.request"
 }

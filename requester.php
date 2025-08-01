@@ -103,7 +103,7 @@ class Request {
         $headerOut = curl_getinfo($ch, CURLINFO_HEADER_OUT);
 
         if ($this->headerPos < strlen($headerOut)) {
-            $new = substr($headerOut, $headerPos);
+            $new = substr($headerOut, $this->headerPos);
             $this->headerPos += strlen($new);
             echo $new;
         }

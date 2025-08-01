@@ -97,6 +97,7 @@ $syntax = [
 
 class Request {
     public $method = 'GET';
+    public $host = '';
     public $url;
     public $headers = [];
     public $options = [];
@@ -119,7 +120,7 @@ class Request {
     private $headerPos = 0;
     private $headerOutSize = 0;
 
-    public function onWrite($ch, $data) 
+    public function onWrite($ch, $data)
     {
         $headerOut = curl_getinfo($ch, CURLINFO_HEADER_OUT);
 
@@ -142,7 +143,8 @@ class Request {
     {
         $ch = curl_init();
 
-        $url = $this->url;
+        $url = $this->host . $this->url;
+
         if (!empty($this->query)) {
             $url .= strpos($url, '?') === false ? '?' : '&';
             $url .= http_build_query($this->query);
@@ -207,6 +209,8 @@ class Request {
 
         curl_close($ch);
 
+        echo "\n\n";
+
         // $out = '';
 
         // if ($this->config['header_out']) {
@@ -215,7 +219,7 @@ class Request {
 
         // $header = substr($result, 0, $headerSize);
         // $body = substr($result, $headerSize);
-        
+
         // if ($this->config['header_in']) {
         //     $out .= $header;
         // }
@@ -241,6 +245,7 @@ class Requester {
     private $fp;
     private $buffer;
     private $config = [];
+    private $host;
     private $out = null;
     private $pos = 0;
 
@@ -290,6 +295,20 @@ class Requester {
 
         $this->request = new Request();
         $this->request->config = $this->config;
+
+        // HOST
+        $host = $this->config['host'] ?? '';
+        if (!empty($this->host)) {
+            $host = $this->host;
+        }
+        $this->request->host = $host;
+
+        // QUERY
+        $query = [];
+        if (isset($this->config['query'])) {
+            $query = $this->config['query'];
+        }
+        $this->request->query = $query;
     }
 
     public function setRequest($method, $url)
@@ -326,6 +345,9 @@ class Requester {
                 break;
             case 'userpwd':
                 $this->request->options[CURLOPT_USERPWD] = $value;
+                break;
+            case 'host':
+                $this->request->host = $value;
                 break;
             default:
                 if (array_key_exists($key, $this->defaultConfig)) {
